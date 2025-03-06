@@ -1,4 +1,4 @@
-import eventModel from "../../Recipe_management/models/recipeModel.js";
+import eventModel from "../models/recipeModel.js";
 // import ticketModel from "../models/recipeBuyModel.js";
 import { ResponseError, ServerError } from "../utils/ErrorResponse.js";
 
