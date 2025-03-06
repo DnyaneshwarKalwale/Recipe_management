@@ -20,6 +20,7 @@ const GenerateRandomImage = () => {
 
 
 
+
 const userSchema = mongoose.Schema({
     name: {
         type: String,

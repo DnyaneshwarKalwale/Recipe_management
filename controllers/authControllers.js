@@ -1,4 +1,4 @@
-import userModel from '../../Recipe_management/models/userModel.js';
+import userModel from '../models/userModel.js';
 import bcrypt from 'bcryptjs';
 import { ResponseError, ServerError } from '../utils/ErrorResponse.js';
 import { sendToken } from '../utils/Token.js';
