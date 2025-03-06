@@ -1,60 +1,50 @@
-import userModel from '../models/userModel.js';
-import bcrypt from 'bcryptjs';
-import { ResponseError, ServerError } from '../utils/ErrorResponse.js';
-import { sendToken } from '../utils/Token.js';
+import User from '../models/userModel.js';
+import { generateToken } from '../utils/Token.js';
+import { errorResponse } from '../utils/ErrorResponse.js';
 
+export const registerUser = async (req, res) => {
+  try {
+    const { name, email, password } = req.body;
+    
+    // Check if user exists
+    const userExists = await User.findOne({ email });
+    if (userExists) return errorResponse(res, 400, 'User already exists');
 
-const HashPassword = async (password) => {
-    const hash = await bcrypt.hash(password, 10);
-    return hash;
-}
+    // Create new user
+    const user = await User.create({ name, email, password });
+    
+    res.status(201).json({
+      _id: user._id,
+      name: user.name,
+      email: user.email,
+      token: generateToken(user._id)
+    });
+    
+  } catch (error) {
+    errorResponse(res, 500, error.message);
+  }
+};
 
+export const loginUser = async (req, res) => {
+  try {
+    const { email, password } = req.body;
+    
+    // Find user
+    const user = await User.findOne({ email });
+    if (!user) return errorResponse(res, 401, 'Invalid credentials');
 
-export const Signup = async (req, resp, next) => {
-    try {
-        const { email, password, name } = req.body;
-        if (!email || !password || !name) {
-            return ResponseError(resp, "all Fields are required")
-        }
+    // Check password
+    const isMatch = await user.matchPassword(password);
+    if (!isMatch) return errorResponse(res, 401, 'Invalid credentials');
 
-        const user = await userModel.findOne({ email });
-        if (user) {
-            return ResponseError(resp, "email already registered")
-        }
-        // if there is no user with given email
-        const newUser = await userModel.create({
-            email, password: await HashPassword(password), name
-        });
-
-        resp.status(200).json({
-            status: 'success',
-            message: 'user registered successfully'
-        });
-
-    } catch (error) {
-        return ServerError(resp)
-    }
-}
-
-
-
-export const Signin = async (req, resp, next) => {
-    try {
-        const { email, password } = req.body;
-        console.log(req.body)
-        if (!email || !password) {
-            return ResponseError(resp, "all Fields are required")
-        }
-        const user = await userModel.findOne({ email });
-        if (!user || !(await user.camparePassword(password, user.password))) {
-            return ResponseError(resp, "Invalid email or password")
-        }
-        sendToken(resp, user, "logged in successfully");
-
-    } catch (error) {
-        console.log(error)
-        return ServerError(resp)
-    }
-}
-
-
+    res.json({
+      _id: user._id,
+      name: user.name,
+      email: user.email,
+      token: generateToken(user._id)
+    });
+    
+  } catch (error) {
+    errorResponse(res, 500, error.message);
+  }
+};

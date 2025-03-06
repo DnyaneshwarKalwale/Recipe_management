@@ -1,55 +1,32 @@
-import { ResponseError, ServerError } from "../utils/ErrorResponse.js"
-import userModel from "../models/userModel.js";
-import eventModel from "../models/recipeModel.js";
+import User from '../models/userModel.js';
+import { errorResponse } from '../utils/ErrorResponse.js';
 
+export const getUserProfile = async (req, res) => {
+  try {
+    // Get user profile with recipes
+    const user = await User.findById(req.params.userId)
+      .select('-password')
+      .populate('recipes', 'title category');
 
-export const getUser = async (req , resp , next) => {
-    try {
-        const {userId} = req.params;
-        const user =  await userModel.findById(userId).select("name description picture");
-        if(!user) return ResponseError(resp , 'user not found');
-        
-        const events = await eventModel.find({
-            owner : user._id
-        });
+    if (!user) return errorResponse(res, 404, 'User not found');
+    
+    res.json(user);
+  } catch (error) {
+    errorResponse(res, 500, error.message);
+  }
+};
 
-        resp.status(200).json({
-            status : 'success',
-            message : "user fetched successfully",
-            user,
-            events
-        });
+export const updateUserProfile = async (req, res) => {
+  try {
+    // Update profile
+    const user = await User.findByIdAndUpdate(
+      req.user._id,
+      { $set: req.body },
+      { new: true, runValidators: true }
+    ).select('-password');
 
-    } catch (error) {
-        ServerError(resp)
-    }
-}
-
-
-export const updateUser = async (req, resp, next) => {
-    try {
-        const { _id } = req.user;
-        const user = await userModel.findByIdAndUpdate(_id, {
-            name: req.body.name,
-            picture: req.body.picture,
-            description: req.body.description,
-        }, { new: true });
-
-
-        resp.status(200).json({
-            status: 'success',
-            message: "profile updated",
-            user: {
-                userId: user._id,
-                description: user.description,
-                name: user.name,
-                picture: user.picture
-            }
-        });
-
-
-    } catch (error) {
-        console.log(error)
-        ServerError(resp)
-    }
-}
+    res.json(user);
+  } catch (error) {
+    errorResponse(res, 500, error.message);
+  }
+};

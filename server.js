@@ -1,42 +1,21 @@
-import app from "./app.js";
-import http from 'http';
+import express from 'express';
 import dotenv from 'dotenv';
-import mongoose from "mongoose";
+import connectDB from './config/db.js';
+import authRoutes from './routes/authRoutes.js';
+import recipeRoutes from './routes/recipeRoutes.js';
+
 dotenv.config();
-const port = process.env.PORT || 1212;
+const app = express();
 
+app.use(express.json());
 
+// Connect Database
+connectDB();
 
-process.on("uncaughtException", (err) => {
-    console.log(err);
-    console.log("😢 UNCAUGHT Exception! Shutting down ...");
-    process.exit(1);
-});
+// Routes
+app.use('/api/auth', authRoutes);
+app.use('/api/recipes', recipeRoutes);
 
-
-
-const server = http.createServer(app);
-
-
-mongoose.connect(process.env.MONGO_URL, {
-    dbName: 'event-prime'
-}).then(() => {
-    console.log('mongodb connected')
-})
-
-
-
-server.listen(port, () => {
-    console.log(`server running on ${process.env.SERVER_URL}:${port}`)
-});
-
-
-
-
-process.on("unhandledRejection", (err) => {
-    console.log(err);
-    console.log(" 😢 UNHANDLED REJECTION! Shutting down ...");
-    server.close(() => {
-        process.exit(1);
-    });
-});
+const PORT = process.env.PORT || 5000;
+app.listen(PORT, () => 
+  console.log(`Server running in ${process.env.NODE_ENV} mode on port ${PORT}`));

@@ -1,14 +1,21 @@
-import { getUser , updateUser } from "../controllers/userController.js";
 import express from 'express';
-import { VarifyToken } from "../utils/Token.js";
+import dotenv from 'dotenv';
+import connectDB from './config/db.js';
+import authRoutes from './routes/authRoutes.js';
+import recipeRoutes from './routes/recipeRoutes.js';
 
-const router = express.Router();
+dotenv.config();
+const app = express();
 
+app.use(express.json());
 
-router.get('/get/:userId' , getUser);
-router.post("/update-profile" , VarifyToken , updateUser)
+// Connect Database
+connectDB();
 
+// Routes
+app.use('/api/auth', authRoutes);
+app.use('/api/recipes', recipeRoutes);
 
-
-
-export default router;
+const PORT = process.env.PORT || 5000;
+app.listen(PORT, () => 
+  console.log(`Server running in ${process.env.NODE_ENV} mode on port ${PORT}`));

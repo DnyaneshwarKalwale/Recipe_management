@@ -1,21 +1,17 @@
-import { createEvent, getEvent, getEvents, getMyEvents, getOrders, getPopularEvents, getUsersEvents, deleteEvent, editEvent } from "../controllers/recipeController.js";
 import express from 'express';
-import { VarifyToken } from '../utils/Token.js'
+import { verifyToken } from '../utils/Token.js';
+import { 
+  createRecipe, 
+  getRecipes, 
+  updateRecipe, 
+  getRandomRecipe 
+} from '../controllers/recipeController.js';
 
 const router = express.Router();
 
-
-
-router.post('/create', VarifyToken, createEvent);
-router.get('/get-users-recipe/:userId', getUsersEvents);
-router.get('/get-my-recipe', VarifyToken, getMyEvents);
-router.get('/get-recipe/:recipeId', getEvent);
-router.get('/get-recipe', getEvents);
-router.get('/get-popular-recipe', getPopularEvents);
-router.get('/orders/:recipeId',VarifyToken , getOrders);
-router.get('/event/:recipeId', VarifyToken, getEvent);
-router.delete('/delete-recipe/:recipeId', VarifyToken, deleteEvent);
-router.put('/edit-recipe/:recipeId', VarifyToken, editEvent);
-
+router.post('/', verifyToken, createRecipe);
+router.get('/', getRecipes);
+router.put('/:id', verifyToken, updateRecipe);
+router.get('/random', getRandomRecipe);
 
 export default router;

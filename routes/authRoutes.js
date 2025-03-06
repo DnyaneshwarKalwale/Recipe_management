@@ -1,13 +1,9 @@
-import {Signup , Signin} from '../controllers/authControllers.js';
 import express from 'express';
-import { VarifyToken } from '../utils/Token.js';
-
+import { registerUser, loginUser } from '../controllers/authController.js';
 
 const router = express.Router();
 
-
-router.post("/sign-up" , Signup)
-router.post("/sign-in" , Signin)
-
+router.post('/register', registerUser);
+router.post('/login', loginUser);
 
 export default router;
